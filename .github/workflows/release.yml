@@ -1,0 +1,30 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: tag
+        run: echo ::set-output name=VERSION_TAG::${GITHUB_REF/refs\/tags\//}
+
+      - name: Make release
+        env:
+          VERSION_TAG: ${{ steps.tag.outputs.VERSION_TAG }}
+        run: |
+          mkdir release
+          zip -r "./release/ambi-tweaks-$VERSION_TAG.zip" data/ pack.mcmeta README.md
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
